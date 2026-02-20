@@ -131,6 +131,69 @@ export async function addOrUpdateMark(formData: FormData): Promise<ActionRespons
   return { success: true, message: "Marks added successfully" };
 }
 
+// ---------- SINGLE MARK SAVE (for individual cell) ----------
+
+export async function saveSingleMark(
+  studentId: string,
+  testKey: string,
+  marks: number
+): Promise<ActionResponse> {
+  const supabase = await createClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { success: false, message: "Unauthorized" };
+
+  if (marks < 0 || marks > 100 || isNaN(marks)) {
+    return { success: false, message: "Marks must be 0–100" };
+  }
+
+  const { data: existing } = await supabase
+    .from("marks")
+    .select("id")
+    .eq("student_id", studentId)
+    .eq("subject", testKey)
+    .single();
+
+  if (existing) {
+    const { error } = await supabase
+      .from("marks")
+      .update({ marks, updated_at: new Date().toISOString() })
+      .eq("id", existing.id);
+    if (error) return { success: false, message: "Failed to update" };
+  } else {
+    const { error } = await supabase
+      .from("marks")
+      .insert({ student_id: studentId, subject: testKey, marks });
+    if (error) return { success: false, message: "Failed to save" };
+  }
+
+  revalidatePath("/teacher/dashboard");
+  return { success: true, message: "Saved" };
+}
+
+// ---------- DELETE SINGLE MARK ----------
+
+export async function deleteSingleMark(
+  studentId: string,
+  testKey: string
+): Promise<ActionResponse> {
+  const supabase = await createClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { success: false, message: "Unauthorized" };
+
+  const { error } = await supabase
+    .from("marks")
+    .delete()
+    .eq("student_id", studentId)
+    .eq("subject", testKey);
+
+  if (error) return { success: false, message: "Failed to delete mark" };
+
+  revalidatePath("/teacher/dashboard");
+  return { success: true, message: "Mark deleted" };
+}
+
 // ---------- BULK MARK SAVE ----------
 
 export async function bulkSaveMarks(

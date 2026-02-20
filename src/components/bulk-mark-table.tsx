@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { bulkSaveMarks } from "@/actions/marks";
+import { useState, useTransition, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import { bulkSaveMarks, saveSingleMark, deleteSingleMark } from "@/actions/marks";
 import { TEST_TYPES, type TestKey } from "@/lib/test-config";
 
 interface Student {
@@ -16,6 +17,8 @@ interface BulkMarkTableProps {
 }
 
 export default function BulkMarkTable({ students, existingMarks }: BulkMarkTableProps) {
+  const router = useRouter();
+
   const [marksMap, setMarksMap] = useState<Record<string, Record<string, string>>>(() => {
     const initial: Record<string, Record<string, string>> = {};
     for (const s of students) {
@@ -29,9 +32,14 @@ export default function BulkMarkTable({ students, existingMarks }: BulkMarkTable
     return initial;
   });
 
+  // Track which cells are being saved/deleted individually
+  const [cellStates, setCellStates] = useState<Record<string, "saving" | "deleting" | "saved" | "deleted" | "error" | null>>({});
+
   const [isPending, startTransition] = useTransition();
   const [feedback, setFeedback] = useState<{ success: boolean; message: string } | null>(null);
   const [activeTest, setActiveTest] = useState<TestKey>("MT1");
+
+  const cellKey = (studentId: string, testKey: string) => `${studentId}_${testKey}`;
 
   function handleChange(studentId: string, testKey: string, value: string) {
     setMarksMap((prev) => ({
@@ -39,7 +47,47 @@ export default function BulkMarkTable({ students, existingMarks }: BulkMarkTable
       [studentId]: { ...prev[studentId], [testKey]: value },
     }));
     setFeedback(null);
+    // Clear cell state when user edits
+    setCellStates((prev) => ({ ...prev, [cellKey(studentId, testKey)]: null }));
   }
+
+  // Save individual cell
+  const handleSaveCell = useCallback(async (studentId: string, testKey: string) => {
+    const val = marksMap[studentId]?.[testKey]?.trim();
+    if (!val) return;
+    const num = Number(val);
+    if (isNaN(num) || num < 0 || num > 100) return;
+
+    const key = cellKey(studentId, testKey);
+    setCellStates((prev) => ({ ...prev, [key]: "saving" }));
+
+    const result = await saveSingleMark(studentId, testKey, num);
+    setCellStates((prev) => ({ ...prev, [key]: result.success ? "saved" : "error" }));
+
+    if (result.success) {
+      router.refresh(); // Live refresh from DB
+      setTimeout(() => setCellStates((prev) => ({ ...prev, [key]: null })), 2000);
+    }
+  }, [marksMap, router]);
+
+  // Delete individual cell
+  const handleDeleteCell = useCallback(async (studentId: string, testKey: string) => {
+    const key = cellKey(studentId, testKey);
+    setCellStates((prev) => ({ ...prev, [key]: "deleting" }));
+
+    const result = await deleteSingleMark(studentId, testKey);
+    if (result.success) {
+      setMarksMap((prev) => ({
+        ...prev,
+        [studentId]: { ...prev[studentId], [testKey]: "" },
+      }));
+      setCellStates((prev) => ({ ...prev, [key]: "deleted" }));
+      router.refresh(); // Live refresh from DB
+      setTimeout(() => setCellStates((prev) => ({ ...prev, [key]: null })), 2000);
+    } else {
+      setCellStates((prev) => ({ ...prev, [key]: "error" }));
+    }
+  }, [router]);
 
   function handleSaveAll() {
     const entries: { student_id: string; test_key: string; marks: number }[] = [];
@@ -63,6 +111,7 @@ export default function BulkMarkTable({ students, existingMarks }: BulkMarkTable
     startTransition(async () => {
       const result = await bulkSaveMarks(entries);
       setFeedback(result);
+      if (result.success) router.refresh(); // Live refresh from DB
     });
   }
 
@@ -131,7 +180,7 @@ export default function BulkMarkTable({ students, existingMarks }: BulkMarkTable
             Total: <span className="font-medium text-gray-600">{totalFilled}</span>/{totalPossible}
           </div>
           {feedback && (
-            <span className={`text-sm font-medium px-3 py-1 rounded-full ${
+            <span className={`text-xs sm:text-sm font-medium px-3 py-1 rounded-full ${
               feedback.success ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-600"
             }`}>
               {feedback.success ? "\u2713" : "\u2717"} {feedback.message}
@@ -167,15 +216,23 @@ export default function BulkMarkTable({ students, existingMarks }: BulkMarkTable
       <div className="px-4 sm:px-6 py-2 bg-white border-b border-gray-100">
         <p className="text-xs sm:text-sm font-medium text-gray-700">
           Entering marks for:{" "}
-          <span className="text-indigo-600 font-bold">
+          <span className="text-blue-600 font-bold">
             {TEST_TYPES.find((t) => t.key === activeTest)?.label}
           </span>
+          <span className="text-gray-400 ml-2 text-xs">(Save individually or use Save All)</span>
         </p>
+      </div>
+
+      {/* Legend */}
+      <div className="px-4 sm:px-6 py-2 bg-gray-50/50 border-b border-gray-100 flex flex-wrap gap-4 text-[10px] sm:text-xs text-gray-400">
+        <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block" /> Saved in DB</span>
+        <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block" /> Unsaved</span>
+        <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-gray-200 inline-block" /> Empty</span>
       </div>
 
       {/* Table */}
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[640px]">
+        <table className="w-full min-w-[700px]">
           <thead>
             <tr className="bg-gray-50/80 text-left">
               <th className="px-3 sm:px-4 py-2.5 sm:py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider w-10 sm:w-12">#</th>
@@ -195,8 +252,11 @@ export default function BulkMarkTable({ students, existingMarks }: BulkMarkTable
                   {t.short}
                 </th>
               ))}
-              <th className="px-3 sm:px-4 py-2.5 sm:py-3 text-xs font-semibold text-blue-600 uppercase tracking-wider text-center w-24 sm:w-28">
-                Enter {activeTest}
+              <th className="px-3 sm:px-4 py-2.5 sm:py-3 text-xs font-semibold text-blue-600 uppercase tracking-wider text-center w-28 sm:w-36">
+                {activeTest}
+              </th>
+              <th className="px-2 py-2.5 sm:py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider text-center w-20">
+                Actions
               </th>
             </tr>
           </thead>
@@ -206,11 +266,18 @@ export default function BulkMarkTable({ students, existingMarks }: BulkMarkTable
               const num = Number(activeVal);
               const isFilled = activeVal !== "";
               const isValid = isFilled && !isNaN(num) && num >= 0 && num <= 100;
+              const key = cellKey(student.id, activeTest);
+              const state = cellStates[key];
+              const hasSavedInDb = existingMarks[student.id]?.[activeTest] !== undefined;
 
               return (
                 <tr
                   key={student.id}
-                  className={`transition-colors ${isFilled ? "bg-blue-50/30" : "hover:bg-gray-50/50"}`}
+                  className={`transition-colors ${
+                    state === "saved" ? "bg-emerald-50/40" :
+                    state === "deleted" ? "bg-red-50/30" :
+                    isFilled ? "bg-blue-50/30" : "hover:bg-gray-50/50"
+                  }`}
                 >
                   <td className="px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm text-gray-300 font-mono">{index + 1}</td>
                   <td className="px-3 sm:px-4 py-2 sm:py-2.5">
@@ -253,6 +320,42 @@ export default function BulkMarkTable({ students, existingMarks }: BulkMarkTable
                             : "border-gray-200 bg-gray-50/50"
                       }`}
                     />
+                  </td>
+                  <td className="px-2 py-2 sm:py-2.5 text-center">
+                    <div className="flex items-center justify-center gap-1">
+                      {/* Save single */}
+                      <button
+                        type="button"
+                        onClick={() => handleSaveCell(student.id, activeTest)}
+                        disabled={!isFilled || !isValid || state === "saving"}
+                        title="Save this mark"
+                        className="w-7 h-7 rounded-lg flex items-center justify-center transition-all disabled:opacity-30 disabled:cursor-not-allowed bg-emerald-50 text-emerald-600 hover:bg-emerald-100"
+                      >
+                        {state === "saving" ? (
+                          <svg className="animate-spin w-3.5 h-3.5" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
+                        ) : state === "saved" ? (
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
+                        ) : (
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                        )}
+                      </button>
+                      {/* Delete single */}
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteCell(student.id, activeTest)}
+                        disabled={!hasSavedInDb || state === "deleting"}
+                        title="Delete this mark from DB"
+                        className="w-7 h-7 rounded-lg flex items-center justify-center transition-all disabled:opacity-30 disabled:cursor-not-allowed bg-red-50 text-red-500 hover:bg-red-100"
+                      >
+                        {state === "deleting" ? (
+                          <svg className="animate-spin w-3.5 h-3.5" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
+                        ) : state === "deleted" ? (
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
+                        ) : (
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                        )}
+                      </button>
+                    </div>
                   </td>
                 </tr>
               );
