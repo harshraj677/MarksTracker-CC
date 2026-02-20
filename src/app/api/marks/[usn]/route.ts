@@ -44,11 +44,54 @@ export async function GET(
     );
   }
 
+  // Compute class rank for each test the student has marks in
+  const studentMarks = marks || [];
+  const testKeys = studentMarks.map((m) => m.subject);
+
+  const ranks: Record<string, { rank: number; total: number }> = {};
+
+  if (testKeys.length > 0) {
+    // Fetch all marks for the tests this student participated in
+    const { data: allMarks } = await supabase
+      .from("marks")
+      .select("student_id, subject, marks")
+      .in("subject", testKeys);
+
+    if (allMarks) {
+      // Group marks by test (subject)
+      const byTest: Record<string, number[]> = {};
+      for (const m of allMarks) {
+        if (!byTest[m.subject]) byTest[m.subject] = [];
+        byTest[m.subject].push(m.marks);
+      }
+
+      // Calculate rank for each test
+      for (const sm of studentMarks) {
+        const scores = byTest[sm.subject] || [];
+        // Sort descending — higher marks = better rank
+        scores.sort((a, b) => b - a);
+        const rank = scores.indexOf(sm.marks) + 1;
+        ranks[sm.subject] = { rank, total: scores.length };
+      }
+    }
+  }
+
+  // Compute overall average rank
+  const rankValues = Object.values(ranks);
+  const avgRank = rankValues.length > 0
+    ? Math.round(rankValues.reduce((sum, r) => sum + r.rank, 0) / rankValues.length)
+    : null;
+  const avgTotal = rankValues.length > 0
+    ? Math.round(rankValues.reduce((sum, r) => sum + r.total, 0) / rankValues.length)
+    : null;
+
   return NextResponse.json({
     student: {
       usn: student.usn,
       name: student.name,
     },
-    marks: marks || [],
+    marks: studentMarks,
+    ranks,
+    overallRank: avgRank !== null ? { rank: avgRank, total: avgTotal } : null,
   });
 }
