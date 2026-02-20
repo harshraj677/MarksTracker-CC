@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, useCallback } from "react";
+import { useState, useEffect, useTransition, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { bulkSaveMarks, saveSingleMark, deleteSingleMark } from "@/actions/marks";
 import { TEST_TYPES, type TestKey } from "@/lib/test-config";
@@ -38,6 +38,30 @@ export default function BulkMarkTable({ students, existingMarks }: BulkMarkTable
   const [isPending, startTransition] = useTransition();
   const [feedback, setFeedback] = useState<{ success: boolean; message: string } | null>(null);
   const [activeTest, setActiveTest] = useState<TestKey>("MT1");
+
+  // Sync local state when server data changes (after router.refresh())
+  const prevMarksRef = useRef(existingMarks);
+  useEffect(() => {
+    const prev = prevMarksRef.current;
+    if (prev === existingMarks) return;
+    prevMarksRef.current = existingMarks;
+
+    setMarksMap((current) => {
+      const updated = { ...current };
+      for (const s of students) {
+        if (!updated[s.id]) updated[s.id] = {};
+        for (const t of TEST_TYPES) {
+          const dbVal = existingMarks[s.id]?.[t.key];
+          const prevDbVal = prev[s.id]?.[t.key];
+          if (dbVal !== prevDbVal) {
+            // DB value changed — sync it
+            updated[s.id] = { ...updated[s.id], [t.key]: dbVal !== undefined ? String(dbVal) : "" };
+          }
+        }
+      }
+      return updated;
+    });
+  }, [existingMarks, students]);
 
   const cellKey = (studentId: string, testKey: string) => `${studentId}_${testKey}`;
 

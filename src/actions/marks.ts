@@ -46,6 +46,7 @@ export async function addStudent(formData: FormData): Promise<ActionResponse> {
   }
 
   revalidatePath("/teacher/dashboard");
+  revalidatePath("/student");
   return { success: true, message: "Student added successfully" };
 }
 
@@ -67,6 +68,7 @@ export async function deleteStudent(studentId: string): Promise<ActionResponse> 
   }
 
   revalidatePath("/teacher/dashboard");
+  revalidatePath("/student");
   return { success: true, message: "Student deleted successfully" };
 }
 
@@ -111,6 +113,7 @@ export async function addOrUpdateMark(formData: FormData): Promise<ActionRespons
     }
 
     revalidatePath("/teacher/dashboard");
+    revalidatePath("/student");
     return { success: true, message: "Marks updated successfully" };
   }
 
@@ -128,6 +131,7 @@ export async function addOrUpdateMark(formData: FormData): Promise<ActionRespons
   }
 
   revalidatePath("/teacher/dashboard");
+  revalidatePath("/student");
   return { success: true, message: "Marks added successfully" };
 }
 
@@ -168,6 +172,7 @@ export async function saveSingleMark(
   }
 
   revalidatePath("/teacher/dashboard");
+  revalidatePath("/student");
   return { success: true, message: "Saved" };
 }
 
@@ -191,6 +196,7 @@ export async function deleteSingleMark(
   if (error) return { success: false, message: "Failed to delete mark" };
 
   revalidatePath("/teacher/dashboard");
+  revalidatePath("/student");
   return { success: true, message: "Mark deleted" };
 }
 
@@ -240,5 +246,6 @@ export async function bulkSaveMarks(
   }
 
   revalidatePath("/teacher/dashboard");
+  revalidatePath("/student");
   return { success: true, message: `Saved ${saved} mark${saved !== 1 ? "s" : ""} successfully` };
 }
