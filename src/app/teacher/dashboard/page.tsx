@@ -51,26 +51,26 @@ export default async function DashboardPage() {
   return (
     <main className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-6 py-5 shadow-sm">
+      <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4 sm:py-5 shadow-sm">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-600 to-sky-500 flex items-center justify-center shadow-lg shadow-blue-500/20">
+          <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br from-blue-600 to-sky-500 flex items-center justify-center shadow-lg shadow-blue-500/20 flex-shrink-0">
               <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.25 15a4.5 4.5 0 004.5 4.5H18a3.75 3.75 0 001.332-7.257 3 3 0 00-3.758-3.848 5.25 5.25 0 00-10.233 2.33A4.502 4.502 0 002.25 15z" />
               </svg>
             </div>
-            <div>
-              <h1 className="text-xl font-extrabold tracking-tight text-gray-900">{SUBJECT_NAME}</h1>
-              <p className="text-gray-400 text-sm">{TEACHER_NAME}</p>
+            <div className="min-w-0">
+              <h1 className="text-lg sm:text-xl font-extrabold tracking-tight text-gray-900 truncate">{SUBJECT_NAME}</h1>
+              <p className="text-gray-400 text-xs sm:text-sm truncate">{TEACHER_NAME}</p>
             </div>
           </div>
           <LogoutButton />
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto p-6 space-y-6">
+      <div className="max-w-7xl mx-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
         {/* Stats Row */}
-        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
           <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
@@ -150,9 +150,9 @@ export default async function DashboardPage() {
 
         {/* Students Table with Save All */}
         <section className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-100">
-            <h2 className="font-bold text-gray-900 text-lg">Student Marks</h2>
-            <p className="text-gray-400 text-sm mt-0.5">
+          <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-100">
+            <h2 className="font-bold text-gray-900 text-base sm:text-lg">Student Marks</h2>
+            <p className="text-gray-400 text-xs sm:text-sm mt-0.5">
               Select a test tab, enter marks (0–100), then click <strong className="text-gray-600">Save All Marks</strong> to save everything at once
             </p>
           </div>

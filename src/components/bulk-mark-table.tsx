@@ -83,8 +83,8 @@ export default function BulkMarkTable({ students, existingMarks }: BulkMarkTable
   return (
     <div>
       {/* Test Type Tabs */}
-      <div className="px-6 py-3 border-b border-gray-100 bg-gray-50/50">
-        <div className="flex flex-wrap gap-2">
+      <div className="px-4 sm:px-6 py-3 border-b border-gray-100 bg-gray-50/50">
+        <div className="flex flex-wrap gap-1.5 sm:gap-2">
           {TEST_TYPES.map((t) => {
             const isActive = activeTest === t.key;
             const isModuleTest = t.key.startsWith("MT");
@@ -97,7 +97,7 @@ export default function BulkMarkTable({ students, existingMarks }: BulkMarkTable
               <button
                 key={t.key}
                 onClick={() => setActiveTest(t.key)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all relative ${
+                className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all relative ${
                   isActive
                     ? isModuleTest
                       ? "bg-blue-600 text-white shadow-md shadow-blue-200"
@@ -120,9 +120,9 @@ export default function BulkMarkTable({ students, existingMarks }: BulkMarkTable
       </div>
 
       {/* Save All Bar */}
-      <div className="px-6 py-3 border-b border-gray-100 bg-blue-50/40 flex items-center justify-between flex-wrap gap-3">
-        <div className="flex items-center gap-4">
-          <div className="text-sm text-gray-500">
+      <div className="px-4 sm:px-6 py-3 border-b border-gray-100 bg-blue-50/40 flex items-center justify-between flex-wrap gap-2 sm:gap-3">
+        <div className="flex items-center gap-2 sm:gap-4">
+          <div className="text-xs sm:text-sm text-gray-500">
             <span className="font-semibold text-blue-600">{activeFilledCount}</span>
             <span className="text-gray-400">/{students.length}</span>
             <span className="ml-1 text-gray-400">{activeTest}</span>
@@ -142,7 +142,7 @@ export default function BulkMarkTable({ students, existingMarks }: BulkMarkTable
           type="button"
           onClick={handleSaveAll}
           disabled={isPending || totalFilled === 0}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed font-semibold transition-all shadow-md shadow-blue-200/50 flex items-center gap-2 text-sm"
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed font-semibold transition-all shadow-md shadow-blue-200/50 flex items-center gap-2 text-xs sm:text-sm"
         >
           {isPending ? (
             <>
@@ -164,8 +164,8 @@ export default function BulkMarkTable({ students, existingMarks }: BulkMarkTable
       </div>
 
       {/* Active Test Label */}
-      <div className="px-6 py-2 bg-white border-b border-gray-100">
-        <p className="text-sm font-medium text-gray-700">
+      <div className="px-4 sm:px-6 py-2 bg-white border-b border-gray-100">
+        <p className="text-xs sm:text-sm font-medium text-gray-700">
           Entering marks for:{" "}
           <span className="text-indigo-600 font-bold">
             {TEST_TYPES.find((t) => t.key === activeTest)?.label}
@@ -175,12 +175,12 @@ export default function BulkMarkTable({ students, existingMarks }: BulkMarkTable
 
       {/* Table */}
       <div className="overflow-x-auto">
-        <table className="w-full">
+        <table className="w-full min-w-[640px]">
           <thead>
             <tr className="bg-gray-50/80 text-left">
-              <th className="px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider w-12">#</th>
-              <th className="px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">USN</th>
-              <th className="px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Student Name</th>
+              <th className="px-3 sm:px-4 py-2.5 sm:py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider w-10 sm:w-12">#</th>
+              <th className="px-3 sm:px-4 py-2.5 sm:py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">USN</th>
+              <th className="px-3 sm:px-4 py-2.5 sm:py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Student Name</th>
               {TEST_TYPES.map((t) => (
                 <th
                   key={t.key}
@@ -195,7 +195,7 @@ export default function BulkMarkTable({ students, existingMarks }: BulkMarkTable
                   {t.short}
                 </th>
               ))}
-              <th className="px-4 py-3 text-xs font-semibold text-blue-600 uppercase tracking-wider text-center w-28">
+              <th className="px-3 sm:px-4 py-2.5 sm:py-3 text-xs font-semibold text-blue-600 uppercase tracking-wider text-center w-24 sm:w-28">
                 Enter {activeTest}
               </th>
             </tr>
@@ -212,13 +212,13 @@ export default function BulkMarkTable({ students, existingMarks }: BulkMarkTable
                   key={student.id}
                   className={`transition-colors ${isFilled ? "bg-blue-50/30" : "hover:bg-gray-50/50"}`}
                 >
-                  <td className="px-4 py-2.5 text-sm text-gray-300 font-mono">{index + 1}</td>
-                  <td className="px-4 py-2.5">
-                    <span className="text-xs font-mono text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">
+                  <td className="px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm text-gray-300 font-mono">{index + 1}</td>
+                  <td className="px-3 sm:px-4 py-2 sm:py-2.5">
+                    <span className="text-[10px] sm:text-xs font-mono text-blue-600 bg-blue-50 px-1 sm:px-1.5 py-0.5 rounded">
                       {student.usn}
                     </span>
                   </td>
-                  <td className="px-4 py-2.5 text-sm font-medium text-gray-800 truncate max-w-[180px]">
+                  <td className="px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-gray-800 truncate max-w-[120px] sm:max-w-[180px]">
                     {student.name}
                   </td>
                   {TEST_TYPES.map((t) => {
@@ -237,7 +237,7 @@ export default function BulkMarkTable({ students, existingMarks }: BulkMarkTable
                       </td>
                     );
                   })}
-                  <td className="px-4 py-2.5 text-center">
+                  <td className="px-3 sm:px-4 py-2 sm:py-2.5 text-center">
                     <input
                       type="number"
                       min={0}
@@ -245,7 +245,7 @@ export default function BulkMarkTable({ students, existingMarks }: BulkMarkTable
                       value={marksMap[student.id]?.[activeTest] ?? ""}
                       onChange={(e) => handleChange(student.id, activeTest, e.target.value)}
                       placeholder="0\u2013100"
-                      className={`w-20 px-2 py-1.5 border rounded-lg text-sm text-center font-mono transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                      className={`w-16 sm:w-20 px-1.5 sm:px-2 py-1 sm:py-1.5 border rounded-lg text-xs sm:text-sm text-center font-mono transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                         isFilled && !isValid
                           ? "border-red-300 bg-red-50"
                           : isFilled

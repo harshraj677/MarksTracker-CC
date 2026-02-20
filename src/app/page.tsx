@@ -8,52 +8,52 @@ export default function Home() {
       <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-sky-50 rounded-full translate-y-1/2 -translate-x-1/3" />
 
       {/* Nav */}
-      <nav className="relative z-10 max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-3 group">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-sky-500 flex items-center justify-center shadow-lg shadow-blue-500/25 group-hover:shadow-blue-500/40 transition-shadow">
-            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <nav className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 py-4 sm:py-5 flex items-center justify-between">
+        <Link href="/" className="flex items-center gap-2.5 sm:gap-3 group">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-blue-600 to-sky-500 flex items-center justify-center shadow-lg shadow-blue-500/25 group-hover:shadow-blue-500/40 transition-shadow">
+            <svg className="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.25 15a4.5 4.5 0 004.5 4.5H18a3.75 3.75 0 001.332-7.257 3 3 0 00-3.758-3.848 5.25 5.25 0 00-10.233 2.33A4.502 4.502 0 002.25 15z" />
             </svg>
           </div>
           <div className="flex flex-col">
-            <span className="text-lg font-extrabold text-gray-900 leading-tight tracking-tight">Cloud<span className="text-blue-600">Test</span></span>
-            <span className="text-[10px] font-medium text-gray-400 uppercase tracking-widest leading-none">Marks Tracker</span>
+            <span className="text-base sm:text-lg font-extrabold text-gray-900 leading-tight tracking-tight">Cloud<span className="text-blue-600">Test</span></span>
+            <span className="text-[9px] sm:text-[10px] font-medium text-gray-400 uppercase tracking-widest leading-none">Marks Tracker</span>
           </div>
         </Link>
-        <div className="flex items-center gap-3">
-          <Link href="/student" className="text-sm font-medium text-gray-500 hover:text-blue-600 transition-colors px-4 py-2">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <Link href="/student" className="text-xs sm:text-sm font-medium text-gray-500 hover:text-blue-600 transition-colors px-2.5 sm:px-4 py-2 hidden sm:inline-flex">
             Student Lookup
           </Link>
-          <Link href="/teacher/login" className="text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors px-5 py-2.5 rounded-lg shadow-sm">
+          <Link href="/teacher/login" className="text-xs sm:text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg shadow-sm">
             Teacher Login
           </Link>
         </div>
       </nav>
 
       {/* Hero */}
-      <div className="relative z-10 max-w-6xl mx-auto px-6 pt-16 pb-24">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
+      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 pt-10 sm:pt-16 pb-16 sm:pb-24">
+        <div className="grid lg:grid-cols-2 gap-10 sm:gap-16 items-center">
           {/* Left Content */}
-          <div>
-            <div className="mb-6 inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-full text-sm font-semibold">
+          <div className="text-center lg:text-left">
+            <div className="mb-4 sm:mb-6 inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-semibold">
               <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
               Cloud Computing &middot; Sanketh Gujjar U
             </div>
 
-            <h1 className="text-5xl sm:text-6xl font-extrabold text-gray-900 leading-[1.1] tracking-tight mb-6">
+            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-gray-900 leading-[1.1] tracking-tight mb-4 sm:mb-6">
               Test Management
               <span className="block text-blue-600">System</span>
             </h1>
 
-            <p className="text-lg text-gray-500 leading-relaxed mb-8 max-w-md">
+            <p className="text-base sm:text-lg text-gray-500 leading-relaxed mb-6 sm:mb-8 max-w-md mx-auto lg:mx-0">
               Manage marks for 5 Module Tests and 2 Internal Tests seamlessly. Teachers grade, students check results instantly.
             </p>
 
             {/* CTA Buttons */}
-            <div className="flex flex-wrap gap-4 mb-10">
+            <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 mb-8 sm:mb-10 justify-center lg:justify-start">
               <Link
                 href="/teacher/login"
-                className="group bg-blue-600 text-white px-7 py-3.5 rounded-xl hover:bg-blue-700 transition-all text-base font-semibold shadow-lg shadow-blue-600/20 hover:shadow-xl hover:shadow-blue-600/30 hover:-translate-y-0.5 transform flex items-center gap-2.5"
+                className="group bg-blue-600 text-white px-6 sm:px-7 py-3 sm:py-3.5 rounded-xl hover:bg-blue-700 transition-all text-sm sm:text-base font-semibold shadow-lg shadow-blue-600/20 hover:shadow-xl hover:shadow-blue-600/30 hover:-translate-y-0.5 transform flex items-center justify-center gap-2.5"
               >
                 <svg className="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
@@ -62,7 +62,7 @@ export default function Home() {
               </Link>
               <Link
                 href="/student"
-                className="group text-gray-700 bg-gray-100 px-7 py-3.5 rounded-xl hover:bg-gray-200 transition-all text-base font-semibold hover:-translate-y-0.5 transform flex items-center gap-2.5"
+                className="group text-gray-700 bg-gray-100 px-6 sm:px-7 py-3 sm:py-3.5 rounded-xl hover:bg-gray-200 transition-all text-sm sm:text-base font-semibold hover:-translate-y-0.5 transform flex items-center justify-center gap-2.5"
               >
                 <svg className="w-5 h-5 text-gray-400 group-hover:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
@@ -72,7 +72,7 @@ export default function Home() {
             </div>
 
             {/* Trust indicators */}
-            <div className="flex items-center gap-6 text-sm text-gray-400">
+            <div className="flex items-center justify-center lg:justify-start gap-4 sm:gap-6 text-xs sm:text-sm text-gray-400">
               <span className="flex items-center gap-1.5">
                 <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
                 Secure
@@ -159,7 +159,7 @@ export default function Home() {
 
       {/* Bottom Feature Bar */}
       <div className="relative z-10 border-t border-gray-100 bg-gray-50/50">
-        <div className="max-w-6xl mx-auto px-6 py-8">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             <div className="flex items-start gap-4">
               <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center flex-shrink-0">

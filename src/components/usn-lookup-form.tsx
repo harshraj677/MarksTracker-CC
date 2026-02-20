@@ -143,7 +143,7 @@ export default function UsnLookupForm() {
                 {/* Module Tests */}
                 <div>
                   <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Module Tests</h4>
-                  <div className="grid grid-cols-5 gap-2">
+                  <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
                     {moduleTests.map((key) => {
                       const val = marksMap[key];
                       const hasVal = val !== undefined;

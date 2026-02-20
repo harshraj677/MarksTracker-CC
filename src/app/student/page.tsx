@@ -3,13 +3,13 @@ import Link from "next/link";
 
 export default function StudentPage() {
   return (
-    <main className="min-h-screen bg-white flex items-center justify-center p-6 relative overflow-hidden">
+    <main className="min-h-screen bg-white flex items-center justify-center p-4 sm:p-6 relative overflow-hidden">
       {/* Background decorations */}
       <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-sky-50 rounded-full -translate-y-1/2 -translate-x-1/3" />
       <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-blue-50 rounded-full translate-y-1/2 translate-x-1/3" />
 
       <div className="w-full max-w-md relative z-10">
-        <div className="bg-white rounded-2xl shadow-xl shadow-gray-200/60 border border-gray-100 p-8">
+        <div className="bg-white rounded-2xl shadow-xl shadow-gray-200/60 border border-gray-100 p-6 sm:p-8">
           <Link
             href="/"
             className="text-sm text-blue-600 hover:text-blue-800 mb-6 inline-flex items-center gap-1 transition-colors"

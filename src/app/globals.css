@@ -9,6 +9,11 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Prevent horizontal overflow on mobile */
+html, body {
+  overflow-x: hidden;
+}
+
 /* Custom gradient backgrounds — blue theme */
 .gradient-bg {
   background: linear-gradient(135deg, #2563eb 0%, #0284c7 100%);
