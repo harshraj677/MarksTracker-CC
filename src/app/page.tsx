@@ -9,14 +9,17 @@ export default function Home() {
 
       {/* Nav */}
       <nav className="relative z-10 max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center">
+        <Link href="/" className="flex items-center gap-3 group">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-sky-500 flex items-center justify-center shadow-lg shadow-blue-500/25 group-hover:shadow-blue-500/40 transition-shadow">
             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.25 15a4.5 4.5 0 004.5 4.5H18a3.75 3.75 0 001.332-7.257 3 3 0 00-3.758-3.848 5.25 5.25 0 00-10.233 2.33A4.502 4.502 0 002.25 15z" />
             </svg>
           </div>
-          <span className="text-lg font-bold text-gray-900">CloudTest</span>
-        </div>
+          <div className="flex flex-col">
+            <span className="text-lg font-extrabold text-gray-900 leading-tight tracking-tight">Cloud<span className="text-blue-600">Test</span></span>
+            <span className="text-[10px] font-medium text-gray-400 uppercase tracking-widest leading-none">Marks Tracker</span>
+          </div>
+        </Link>
         <div className="flex items-center gap-3">
           <Link href="/student" className="text-sm font-medium text-gray-500 hover:text-blue-600 transition-colors px-4 py-2">
             Student Lookup
@@ -91,7 +94,7 @@ export default function Home() {
               {/* Main card */}
               <div className="bg-white rounded-3xl shadow-2xl shadow-gray-200/60 border border-gray-100 p-8">
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-sky-500 flex items-center justify-center shadow-lg shadow-blue-500/20">
                     <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                     </svg>
