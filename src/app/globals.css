@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom gradient backgrounds — blue theme */
+.gradient-bg {
+  background: linear-gradient(135deg, #2563eb 0%, #0284c7 100%);
+}
+
+.gradient-green {
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+}
+
+.gradient-blue {
+  background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 100%);
+}
