@@ -1,28 +1,53 @@
 import { redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getSubjectBySlug, getSubjectByTeacherEmail } from "@/lib/subjects";
 import BulkMarkTable from "@/components/bulk-mark-table";
 import LogoutButton from "@/components/logout-button";
-import { TEST_TYPES, SUBJECT_NAME, TEACHER_NAME } from "@/lib/test-config";
+import { TEST_TYPES } from "@/lib/test-config";
 import type { Student, Mark } from "@/lib/types";
 
-export default async function DashboardPage() {
+interface PageProps {
+  params: Promise<{ slug: string }>;
+}
+
+export default async function DashboardPage({ params }: PageProps) {
+  const { slug } = await params;
+  const subject = getSubjectBySlug(slug);
+  if (!subject) notFound();
+
   const supabase = await createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/teacher/login");
+  if (!user) redirect(`/${slug}/teacher/login`);
+
+  // Verify this teacher owns this subject
+  const teacherSubject = getSubjectByTeacherEmail(user.email || "");
+  if (!teacherSubject || teacherSubject.slug !== slug) {
+    redirect(`/${teacherSubject?.slug || slug}/teacher/dashboard`);
+  }
 
   const { data: students } = await supabase
     .from("students")
     .select("*")
+    .eq("subject_slug", slug)
     .order("usn", { ascending: true });
 
-  const { data: marks } = await supabase
-    .from("marks")
-    .select("*");
+  const studentIds = (students || []).map((s: Student) => s.id);
+
+  // Only fetch marks for students in this subject
+  let marks: Mark[] = [];
+  if (studentIds.length > 0) {
+    const { data } = await supabase
+      .from("marks")
+      .select("*")
+      .in("student_id", studentIds);
+    marks = data || [];
+  }
 
   // Map: student_id -> { testKey -> marks }
   const marksByStudent: Record<string, Record<string, number>> = {};
-  (marks || []).forEach((mark: Mark) => {
+  marks.forEach((mark: Mark) => {
     if (!marksByStudent[mark.student_id]) {
       marksByStudent[mark.student_id] = {};
     }
@@ -31,15 +56,13 @@ export default async function DashboardPage() {
 
   const totalStudents = (students || []).length;
 
-  // Count how many students have ALL 7 tests filled
   const fullyMarked = (students || []).filter((s: Student) => {
     const sm = marksByStudent[s.id];
     if (!sm) return false;
     return TEST_TYPES.every((t) => sm[t.key] !== undefined);
   }).length;
 
-  // Count total individual marks entered
-  const totalMarksEntered = (marks || []).length;
+  const totalMarksEntered = marks.length;
   const totalPossible = totalStudents * TEST_TYPES.length;
 
   const studentList = (students || []).map((s: Student) => ({
@@ -48,20 +71,28 @@ export default async function DashboardPage() {
     name: s.name,
   }));
 
+  const isBlue = subject.color === "blue";
+
   return (
     <main className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4 sm:py-5 shadow-sm">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br from-blue-600 to-sky-500 flex items-center justify-center shadow-lg shadow-blue-500/20 flex-shrink-0">
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.25 15a4.5 4.5 0 004.5 4.5H18a3.75 3.75 0 001.332-7.257 3 3 0 00-3.758-3.848 5.25 5.25 0 00-10.233 2.33A4.502 4.502 0 002.25 15z" />
-              </svg>
+            <div className={`w-10 h-10 sm:w-11 sm:h-11 rounded-xl ${isBlue ? "bg-gradient-to-br from-blue-600 to-sky-500 shadow-blue-500/20" : "bg-gradient-to-br from-emerald-600 to-teal-500 shadow-emerald-500/20"} flex items-center justify-center shadow-lg flex-shrink-0`}>
+              {subject.icon === "cloud" ? (
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.25 15a4.5 4.5 0 004.5 4.5H18a3.75 3.75 0 001.332-7.257 3 3 0 00-3.758-3.848 5.25 5.25 0 00-10.233 2.33A4.502 4.502 0 002.25 15z" />
+                </svg>
+              ) : (
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
+                </svg>
+              )}
             </div>
             <div className="min-w-0">
-              <h1 className="text-lg sm:text-xl font-extrabold tracking-tight text-gray-900 truncate">{SUBJECT_NAME}</h1>
-              <p className="text-gray-400 text-xs sm:text-sm truncate">{TEACHER_NAME}</p>
+              <h1 className="text-lg sm:text-xl font-extrabold tracking-tight text-gray-900 truncate">{subject.name}</h1>
+              <p className="text-gray-400 text-xs sm:text-sm truncate">{subject.teacherName} &middot; {subject.code}</p>
             </div>
           </div>
           <LogoutButton />
@@ -73,8 +104,8 @@ export default async function DashboardPage() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
           <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
-                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className={`w-10 h-10 rounded-xl ${isBlue ? "bg-blue-100" : "bg-emerald-100"} flex items-center justify-center`}>
+                <svg className={`w-5 h-5 ${isBlue ? "text-blue-600" : "text-emerald-600"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
                 </svg>
               </div>
@@ -138,7 +169,7 @@ export default async function DashboardPage() {
               {TEST_TYPES.map((t) => (
                 <span key={t.key} className={`px-3 py-1 rounded-full text-xs font-medium ${
                   t.key.startsWith("MT")
-                    ? "bg-blue-50 text-blue-600"
+                    ? isBlue ? "bg-blue-50 text-blue-600" : "bg-emerald-50 text-emerald-600"
                     : "bg-sky-50 text-sky-600"
                 }`}>
                   {t.label}
@@ -148,19 +179,19 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        {/* Students Table with Save All */}
+        {/* Students Table */}
         <section className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-100">
             <h2 className="font-bold text-gray-900 text-base sm:text-lg">Student Marks</h2>
             <p className="text-gray-400 text-xs sm:text-sm mt-0.5">
-              Select a test tab, enter marks (0–100), then click <strong className="text-gray-600">Save All Marks</strong> to save everything at once
+              Select a test tab, enter marks (0–100), save individually or use <strong className="text-gray-600">Save All Marks</strong>
             </p>
           </div>
 
           {(!students || students.length === 0) ? (
-            <p className="text-gray-400 text-sm p-6">No students found.</p>
+            <p className="text-gray-400 text-sm p-6">No students found for this subject.</p>
           ) : (
-            <BulkMarkTable students={studentList} existingMarks={marksByStudent} />
+            <BulkMarkTable students={studentList} existingMarks={marksByStudent} slug={slug} />
           )}
         </section>
       </div>

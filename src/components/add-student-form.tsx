@@ -6,10 +6,14 @@ import type { ActionResponse } from "@/lib/types";
 
 const initialState: ActionResponse = { success: false, message: "" };
 
-export default function AddStudentForm() {
+interface AddStudentFormProps {
+  slug: string;
+}
+
+export default function AddStudentForm({ slug }: AddStudentFormProps) {
   const [state, formAction, pending] = useActionState(
     async (_prev: ActionResponse, formData: FormData) => {
-      return await addStudent(formData);
+      return await addStudent(formData, slug);
     },
     initialState
   );

@@ -2,6 +2,7 @@ export interface Student {
   id: string;
   usn: string;
   name: string;
+  subject_slug: string;
   created_at: string;
 }
 

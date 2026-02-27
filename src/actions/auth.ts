@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { loginSchema } from "@/lib/validators";
 import type { ActionResponse } from "@/lib/types";
 
-export async function login(formData: FormData): Promise<ActionResponse> {
+export async function login(formData: FormData, slug: string): Promise<ActionResponse> {
   const raw = {
     email: formData.get("email") as string,
     password: formData.get("password") as string,
@@ -33,7 +33,7 @@ export async function login(formData: FormData): Promise<ActionResponse> {
     };
   }
 
-  redirect("/teacher/dashboard");
+  redirect(`/${slug}/teacher/dashboard`);
 }
 
 export async function logout(): Promise<void> {

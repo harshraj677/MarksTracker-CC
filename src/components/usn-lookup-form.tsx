@@ -40,11 +40,13 @@ function RankBadge({ rank, total }: { rank: number; total: number }) {
   );
 }
 
-export default function UsnLookupForm() {
+export default function UsnLookupForm({ slug, color }: { slug: string; color: "blue" | "emerald" }) {
   const [usn, setUsn] = useState("");
   const [result, setResult] = useState<MarkResult | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const isBlue = color === "blue";
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -59,7 +61,7 @@ export default function UsnLookupForm() {
 
     setLoading(true);
     try {
-      const res = await fetch(`/api/marks/${encodeURIComponent(trimmed)}`);
+      const res = await fetch(`/api/marks/${encodeURIComponent(slug)}/${encodeURIComponent(trimmed)}`);
       const data = await res.json();
 
       if (!res.ok) {
@@ -103,7 +105,7 @@ export default function UsnLookupForm() {
             onChange={(e) => setUsn(e.target.value)}
             placeholder="e.g. 4PM23CS001"
             required
-            className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50/50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white transition-all text-gray-800 placeholder:text-gray-300"
+            className={`w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50/50 focus:outline-none focus:ring-2 ${isBlue ? "focus:ring-blue-500" : "focus:ring-emerald-500"} focus:border-transparent focus:bg-white transition-all text-gray-800 placeholder:text-gray-300`}
           />
         </div>
 
@@ -119,7 +121,7 @@ export default function UsnLookupForm() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all font-medium shadow-md shadow-blue-200/50 flex items-center justify-center gap-2"
+          className={`w-full ${isBlue ? "bg-blue-600 hover:bg-blue-700 shadow-blue-200/50" : "bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200/50"} text-white py-3 px-4 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all font-medium shadow-md flex items-center justify-center gap-2`}
         >
           {loading ? (
             <>
@@ -143,7 +145,7 @@ export default function UsnLookupForm() {
       {result && (
         <div className="mt-6 bg-white/80 backdrop-blur border border-gray-100 rounded-2xl overflow-hidden shadow-sm">
           {/* Student Header */}
-          <div className="bg-gradient-to-r from-blue-600 to-blue-500 px-4 sm:px-5 py-4 text-white">
+          <div className={`${isBlue ? "bg-gradient-to-r from-blue-600 to-blue-500" : "bg-gradient-to-r from-emerald-600 to-emerald-500"} px-4 sm:px-5 py-4 text-white`}>
             <div className="flex items-center gap-3">
               <div className="w-11 h-11 rounded-full bg-white/20 flex items-center justify-center text-lg font-bold flex-shrink-0">
                 {result.student.name.charAt(0)}
@@ -195,11 +197,11 @@ export default function UsnLookupForm() {
                       const hasVal = val !== undefined;
                       const rankInfo = result.ranks?.[key];
                       return (
-                        <div key={key} className={`rounded-xl p-2 sm:p-3 text-center relative ${hasVal ? "bg-blue-50 border border-blue-100" : "bg-gray-50 border border-gray-100"}`}>
+                        <div key={key} className={`rounded-xl p-2 sm:p-3 text-center relative ${hasVal ? (isBlue ? "bg-blue-50 border border-blue-100" : "bg-emerald-50 border border-emerald-100") : "bg-gray-50 border border-gray-100"}`}>
                           <p className="text-[10px] sm:text-xs font-semibold text-gray-400 mb-0.5">{key}</p>
                           {hasVal ? (
                             <>
-                              <p className="text-lg sm:text-xl font-bold text-blue-700">{val}</p>
+                              <p className={`text-lg sm:text-xl font-bold ${isBlue ? "text-blue-700" : "text-emerald-700"}`}>{val}</p>
                               {rankInfo && (
                                 <div className="mt-1">
                                   <RankBadge rank={rankInfo.rank} total={rankInfo.total} />
@@ -254,7 +256,7 @@ export default function UsnLookupForm() {
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-xs sm:text-sm text-gray-500">Average marks</span>
-                    <span className="text-xs sm:text-sm font-bold text-blue-600">{avgMarks} / 100</span>
+                    <span className={`text-xs sm:text-sm font-bold ${isBlue ? "text-blue-600" : "text-emerald-600"}`}>{avgMarks} / 100</span>
                   </div>
                   {result.overallRank && (
                     <div className="flex items-center justify-between">

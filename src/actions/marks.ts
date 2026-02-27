@@ -4,10 +4,18 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { studentSchema, markSchema } from "@/lib/validators";
 import type { ActionResponse } from "@/lib/types";
+import { getAllSlugs } from "@/lib/subjects";
+
+function revalidateAllPaths() {
+  for (const slug of getAllSlugs()) {
+    revalidatePath(`/${slug}/teacher/dashboard`);
+    revalidatePath(`/${slug}/student`);
+  }
+}
 
 // ---------- STUDENT ACTIONS ----------
 
-export async function addStudent(formData: FormData): Promise<ActionResponse> {
+export async function addStudent(formData: FormData, slug: string): Promise<ActionResponse> {
   const raw = {
     usn: formData.get("usn") as string,
     name: formData.get("name") as string,
@@ -26,27 +34,27 @@ export async function addStudent(formData: FormData): Promise<ActionResponse> {
     return { success: false, message: "Unauthorized" };
   }
 
-  // Check if USN already exists
+  // Check if USN already exists for this subject
   const { data: existing } = await supabase
     .from("students")
     .select("id")
     .eq("usn", parsed.data.usn)
+    .eq("subject_slug", slug)
     .single();
 
   if (existing) {
-    return { success: false, message: "A student with this USN already exists" };
+    return { success: false, message: "A student with this USN already exists in this subject" };
   }
 
   const { error } = await supabase
     .from("students")
-    .insert({ usn: parsed.data.usn, name: parsed.data.name });
+    .insert({ usn: parsed.data.usn, name: parsed.data.name, subject_slug: slug });
 
   if (error) {
     return { success: false, message: "Failed to add student. Please try again." };
   }
 
-  revalidatePath("/teacher/dashboard");
-  revalidatePath("/student");
+  revalidateAllPaths();
   return { success: true, message: "Student added successfully" };
 }
 
@@ -67,8 +75,7 @@ export async function deleteStudent(studentId: string): Promise<ActionResponse> 
     return { success: false, message: "Failed to delete student" };
   }
 
-  revalidatePath("/teacher/dashboard");
-  revalidatePath("/student");
+  revalidateAllPaths();
   return { success: true, message: "Student deleted successfully" };
 }
 
@@ -112,8 +119,7 @@ export async function addOrUpdateMark(formData: FormData): Promise<ActionRespons
       return { success: false, message: "Failed to update marks" };
     }
 
-    revalidatePath("/teacher/dashboard");
-    revalidatePath("/student");
+    revalidateAllPaths();
     return { success: true, message: "Marks updated successfully" };
   }
 
@@ -130,8 +136,7 @@ export async function addOrUpdateMark(formData: FormData): Promise<ActionRespons
     return { success: false, message: "Failed to add marks" };
   }
 
-  revalidatePath("/teacher/dashboard");
-  revalidatePath("/student");
+  revalidateAllPaths();
   return { success: true, message: "Marks added successfully" };
 }
 
@@ -171,8 +176,7 @@ export async function saveSingleMark(
     if (error) return { success: false, message: "Failed to save" };
   }
 
-  revalidatePath("/teacher/dashboard");
-  revalidatePath("/student");
+  revalidateAllPaths();
   return { success: true, message: "Saved" };
 }
 
@@ -195,8 +199,7 @@ export async function deleteSingleMark(
 
   if (error) return { success: false, message: "Failed to delete mark" };
 
-  revalidatePath("/teacher/dashboard");
-  revalidatePath("/student");
+  revalidateAllPaths();
   return { success: true, message: "Mark deleted" };
 }
 
@@ -245,7 +248,6 @@ export async function bulkSaveMarks(
     saved++;
   }
 
-  revalidatePath("/teacher/dashboard");
-  revalidatePath("/student");
+  revalidateAllPaths();
   return { success: true, message: `Saved ${saved} mark${saved !== 1 ? "s" : ""} successfully` };
 }

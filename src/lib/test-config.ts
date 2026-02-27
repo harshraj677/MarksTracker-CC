@@ -1,4 +1,4 @@
-// Test configuration for Cloud Computing
+// Test configuration — shared across all subjects
 // 5 Module Tests + 2 Internal Tests
 
 export const TEST_TYPES = [
@@ -16,6 +16,4 @@ export type TestKey = (typeof TEST_TYPES)[number]["key"];
 export const MODULE_TESTS = TEST_TYPES.filter((t) => t.key.startsWith("MT"));
 export const INTERNAL_TESTS = TEST_TYPES.filter((t) => t.key.startsWith("IT"));
 
-export const SUBJECT_NAME = "Cloud Computing";
-export const TEACHER_NAME = "Sanketh Gujjar U";
 export const MAX_MARKS = 100;

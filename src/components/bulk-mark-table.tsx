@@ -14,9 +14,10 @@ interface Student {
 interface BulkMarkTableProps {
   students: Student[];
   existingMarks: Record<string, Record<string, number>>; // student_id -> { testKey -> marks }
+  slug: string;
 }
 
-export default function BulkMarkTable({ students, existingMarks }: BulkMarkTableProps) {
+export default function BulkMarkTable({ students, existingMarks, slug }: BulkMarkTableProps) {
   const router = useRouter();
 
   const [marksMap, setMarksMap] = useState<Record<string, Record<string, string>>>(() => {
